@@ -1,1 +1,50 @@
 <!DOCTYPE html>
+<html>
+  <title>Login</title>
+  <head>
+    <link rel="stylesheet" href="index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+
+<body>
+    <h1>Stock Simulator Xtreme 2020 Pro Edition</h1>
+
+    <div id="login">
+      <h2>Log in<span id="cursor">|</span></h2><br>
+
+      <script>
+          var cursor = true;
+          var speed = 500;
+          setInterval(() => {
+            if(cursor) {
+              document.getElementById('cursor').style.opacity = 0;
+              cursor = false;
+            }else {
+              document.getElementById('cursor').style.opacity = 1;
+              cursor = true;
+            }
+          }, speed);
+      </script>
+
+      <input type="text" placeholder="username" id="username"><br>
+      <input type="password" placeholder="password" id="password"><br>
+      <button onclick="document.location='main.html'" id="login_button">Sign in</button>
+      <a href id="create_account">New? Create an account</a><br>
+      <div class="or"><span style="font-family: 'Helvetica'">––––––––– </span>or<span style="font-family: 'Helvetica'"> –––––––––</span></div><br>
+      <a id="continue" href="map_main.html">Continue as a guest</a>
+    </div>
+
+    <script>
+      var inputs = document.getElementsByTagName('input');
+
+      for (var index = 0; index < inputs.length; ++index) {
+        inputs[index].addEventListener("keyup", function(event) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("login_button").click();
+          }
+        });
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@200;400&display=swap');
+
+body {
+  background-color: #003;
+  font-family: 'Roboto Mono';
+  margin-top: 10px;
+  text-align: center;
+}
+
+h1 {
+  font-size: min(4.1vw);
+  padding-bottom: 40px;
+  margin-top: 10px;
+  color: white;
+}
+
+h2 {
+  font-size: 30px;
+  margin-bottom: -5px;
+  color: white;
+}
+
+#login {
+  position:    absolute;
+  left:        50%;
+  top:         50%;
+  width:       300px;
+  height:      350px;
+  margin-left: -150px;
+  margin-top:  -175px;
+}
+
+input {
+  width: 220px;
+  height: 35px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  font-family: 'Roboto Mono';
+  color: #555;
+  background-color: #dfdfdf;
+  border-style: solid;
+  border-color: #777;
+  border-width: 2px;
+  font-weight: 200;
+  text-indent: 5px;
+}
+
+input:focus {
+  outline: none;
+  background-color: #fff;
+}
+
+#login_button {
+  width: 228px;
+  height: 43px;
+  display: block;
+  border: none;
+  border-radius: 0;
+  background: #777;
+  color: white;
+  font-size: 16px;
+  margin: auto;
+  font-family: 'Roboto Mono';
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+#login_button:focus { 
+  outline: none;
+}
+
+#login_button:active {
+  background: #222;
+}
+
+#create_account {
+  color: #77f;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+#create_account:active {
+  color: #aaf;
+}
+
+.or {
+  display: inline-block;
+  margin-top: 8px;
+  color: #999;
+}
+
+#continue {
+  margin-top: 5px;
+  color: #77f;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+#continue:active {
+  color: #aaf;
+}
+
+p {
+  color: white;
+}
