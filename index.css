@@ -11,7 +11,7 @@ h1 {
   font-size: min(4.1vw);
   padding-bottom: 40px;
   margin-top: 10px;
-  color: white;
+  color: lime;
 }
 
 h2 {
@@ -70,34 +70,26 @@ input:focus {
 }
 
 #login_button:active {
-  background: #222;
+  background: #444;
 }
 
 #create_account {
-  color: #77f;
+  color: lime;
   font-size: 14px;
   text-decoration: underline;
-}
-
-#create_account:active {
-  color: #aaf;
 }
 
 .or {
   display: inline-block;
   margin-top: 8px;
-  color: #999;
+  color: white;
 }
 
 #continue {
   margin-top: 5px;
-  color: #77f;
+  color: lime;
   font-size: 14px;
   text-decoration: underline;
-}
-
-#continue:active {
-  color: #aaf;
 }
 
 p {

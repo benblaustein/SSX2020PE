@@ -10,13 +10,117 @@
     <div id="navbar">
       <h2>SSX2020PE™</h2>
       <div id="navmenu">
+        <a href="">About</a>
+        <span>|</span>
+        <a href="">Account</a>
+        <span>|</span>
         <a href="">Help</a>
+        <span>|</span>
         <a href="">Logout</a>
       </div>
     </div>
 
-    <div id="graphic"></div>
-    <div id="menu"></div>
-    <div id="holdings"></div>
+    <div id="graphic">
+    </div>
+
+    <div id="menu">
+      <h1 id="current_ticker">$AMZN</h1>
+      <h4 id="current_stock">Amazon</h4>
+      <hr style="border: 1.5px solid white">
+      <p id="current_holdings">Current holdings: <span id="num_shares">5</span> shares</p>
+      <p id="shares_value">Total value of shares: $<span id="shares_dollars">12,390.54</span></p>
+      <form id="buy_sell">
+        <input type="radio" id="buy" name="buy_or_sell" value="buy" checked>
+        <label for="buy">Buy</label>
+        <input type="radio" id="sell" name="buy_or_sell" value="sell">
+        <label for="sell">Sell</label>
+        <input id="buy_sell_shares" type="number">
+        <span> shares<button type="button" id="confirm_sale" onclick="confirmSale()">Confirm</button></span>
+      </form>
+      <hr style="border: 1.5px solid white">
+      <div id="enter_ticker">Enter a new stock symbol: <input id="new_ticker"><button type="button" id="search_ticker" onclick="updateTicker()">Search</button></div>
+
+      <hr style="border: 1.5px solid white">
+    </div>
+
+    <div id="holdings">
+      <div id="stats_time">
+        <p>Current date: 9/24/2007</p>
+        <p>Days remaining: 120</p>
+        <p>24hr change: -7.34%/$903.40</p>
+        <p>Overall change: +399.34%/$46,308.26</p>
+      </div>
+      <div id="stats_cash">
+        <p>Cash available: $2,140.63</p>
+        <p>Portfolio value: $49,207.63</p>
+        <p>Total assets: $51,308.26</p>
+      </div>
+      <div id="stats_holdings">
+        <table id="holdings_table">
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Shares</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>AMZN</td>
+              <td>5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </body>
 </html>
+
+<!--SK92GYM09TPNS82E-->
