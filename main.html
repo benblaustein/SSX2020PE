@@ -4,6 +4,7 @@
   <head>
     <link rel="stylesheet" href="main.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   </head>
 
   <body>
@@ -24,8 +25,8 @@
     </div>
 
     <div id="menu">
-      <h1 id="current_ticker">$AMZN</h1>
-      <h4 id="current_stock">Amazon</h4>
+      <h1 id="current_ticker">$AAPL</h1>
+      <h4 id="current_stock">Apple Inc</h4>
       <hr style="border: 1.5px solid white">
       <p id="current_holdings">Current holdings: <span id="num_shares">5</span> shares</p>
       <p id="shares_value">Total value of shares: $<span id="shares_dollars">12,390.54</span></p>
@@ -49,6 +50,7 @@
         <p>Days remaining: 120</p>
         <p>24hr change: -7.34%/$903.40</p>
         <p>Overall change: +399.34%/$46,308.26</p>
+        <button id="advance_date" type="button" onclick="advanceDate()">Advance day</button>
       </div>
       <div id="stats_cash">
         <p>Cash available: $2,140.63</p>
@@ -120,7 +122,166 @@
         </table>
       </div>
     </div>
+
+    <script>
+      const apiKey = "SK92GYM09TPNS82E";
+      var date = new Date();
+      date.setDate(date.getDate() - 365);
+      var daysRemaining;
+      var prevDayAssets;
+      var cashAvailable;
+      var portfolioValue;
+      var currentTicker = "AAPL";
+      var validDates;
+      var userStocks = {};
+      getValidDates();
+
+      updateGraph("AAPL");
+
+      async function getValidDates() {
+        const url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&outputsize=full&apikey=" + apiKey;
+        const dates = await fetch(url)
+        .then(response => response.json())
+        .then(data => data["Time Series (Daily)"]);
+        validDates = dates;
+      }
+
+      async function advanceDate() {
+        date.setDate(date.getDate() + 1);
+        while (!(date.toISOString().substring(0,10) in validDates)) {
+          date.setDate(date.getDate() + 1);
+        }
+        updateGraph(currentTicker);
+      }
+
+      async function updateTicker() {
+        var ticker = document.getElementById("new_ticker").value.toUpperCase();
+        if (ticker.length == 0) {
+          return;
+        }
+        if (ticker.charAt(0) == '$') {
+          ticker = ticker.substring(1, ticker.length);
+        }
+        const overviewUrl = "https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker + "&apikey=" + apiKey;
+        const companyName = await fetch(overviewUrl)
+        .then(response => response.json())
+        .then(data => data.Name);
+        if (typeof companyName !== 'undefined') {
+          const seriesUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&outputsize=full&apikey=" + apiKey;
+          const currentPrice = await fetch(seriesUrl)
+            .then(response => response.json())
+            .then(data => data["Time Series (Daily)"]["2020-07-22"]["4. close"]);
+          currentTicker = ticker;
+          updateGraph(ticker);
+          document.getElementById("current_ticker").innerHTML = "$" + ticker;
+          document.getElementById("current_stock").innerHTML = companyName;
+        }
+        else {
+          console.error("Company not found for given ticker");
+        }
+        document.getElementById("new_ticker").value = "";
+      }
+
+      async function updateGraph(ticker) {
+        if (!(ticker in userStocks)) {
+          console.log("ticker " + ticker + " not found, getting data from alphavantage");
+          const url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + ticker + "&outputsize=full&apikey=" + apiKey;
+          let timeSeries = await fetch(url)
+            .then(response => response.json())
+            .then(data => data["Time Series (Daily)"]);
+          userStocks[ticker] = {
+            shares: 0,
+            timeSeries: timeSeries
+          }
+        }
+        else {
+          console.log("ticker " + ticker + " found, getting data from storage");
+        }
+        jsonData = userStocks[ticker].timeSeries;
+        console.log(jsonData);
+
+        var trace = {
+          type: "scatter",
+          mode: "lines",
+          x: [],
+          y: [],
+          line: {color: 'lime'}
+        }
+
+        for (var key in jsonData) {
+            if (jsonData.hasOwnProperty(key)) {
+                trace.x.push(key);
+                trace.y.push(jsonData[key]['4. close']);
+            }
+        }
+
+        var data = [trace];
+
+        // a week ago
+        var date1 = new Date(date);
+        date1.setDate(date1.getDate() - 7);
+
+        min = 0;
+        max = 0;
+        first = 0;
+        last = 0;
+
+        for (var i = new Date(date1); i <= date; i.setDate(i.getDate() + 1)) {
+          dateString = i.toISOString().substring(0,10);
+          if (dateString in jsonData) {
+            closePrice = jsonData[dateString]['4. close'];
+            if (first == 0) {
+              min = closePrice;
+              max = closePrice;
+              first = closePrice;
+            }
+            if (closePrice < min) {
+              min = closePrice;
+            }
+            if (closePrice > max) {
+              max = closePrice;
+            }
+            last = closePrice;
+          }
+        }
+
+        if (first > last) {
+          trace.line.color = 'red';
+        }
+
+        var layout = {
+          title: '$' + ticker + ' Stock Price',
+          paper_bgcolor: '#003',
+          plot_bgcolor: '#003',
+          font: {
+            family: 'Roboto Mono, monospace',
+            color: '#fff'
+          },
+          coloraxis: {
+            colorbar: {
+              tickcolor: '#fff',
+              showticklabels: false
+            }
+          },
+          titlefont: {
+            size: 30
+          },
+          xaxis: {
+            range: [date1, date],
+            gridcolor: '#335'
+          },
+          yaxis: {
+            range: [min, max],
+            gridcolor: '#335'
+          }
+        };
+
+        var config = {
+          responsive: true
+        }
+
+        Plotly.newPlot('graphic', data, layout, config);
+      }
+    </script>
   </body>
 </html>
-
-<!--SK92GYM09TPNS82E-->
