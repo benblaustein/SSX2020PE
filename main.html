@@ -59,6 +59,7 @@
           });
         </script>
       <hr style="border: 1.5px solid white">
+      <button id="advance_date" type="button" onclick="advanceDate()">Advance day</button>
     </div>
 
     <div id="holdings">
@@ -67,7 +68,6 @@
         <p>Days remaining: <span id="days_remaining"></span></p>
         <p>24hr change: <span id="24hr_change_percent">0.00</span>%/$<span id="24hr_change_dollars">0.00</span></p>
         <p>Overall change: <span id="total_change_percent">0.00</span>%/$<span id="total_change_dollars">0.00</span></p>
-        <button id="advance_date" type="button" onclick="advanceDate()">Advance day</button>
       </div>
       <div id="stats_cash">
         <p>Cash available: $<span id="cash_available">0.00</span></p>
@@ -90,11 +90,57 @@
 
     <div id="notification_bar">
       <div id="notification_text">
-        Date advanced
       </div>
     </div>
 
+    <div id="calendarModal" class="modal">
+      <div class="modal-content">
+        <p>Select a date to begin:</p>
+        <input id="pick_date" type="date" min="1999-11-01"><br><br>
+        <button id="submit_date">Submit</button>
+      </div>
+    </div>
     <script>
+      var input = document.getElementById("pick_date");
+      input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          document.getElementById("submit_date").click();
+        }
+      });
+    </script>
+
+    <script>
+
+      var modal = document.getElementById("calendarModal");
+      var button = document.getElementById("submit_date");
+      var body = document.getElementsByTagName("body")[0];
+      window.onload = function() {
+        modal.style.display = "block";
+        body.style.overflow = "hidden";
+        date = new Date();
+        date.setDate(date.getDate() - 370);
+        document.getElementById("pick_date").setAttribute("max", date.toISOString().substring(0,10));
+      }
+      button.onclick = function() {
+        date = document.getElementById("pick_date").value;
+        parsedDate = new Date(date);
+        maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() - 370);
+        minDate = new Date("1999-11-01");
+        if (date == "") {
+          notify("Please enter a date");
+        }
+        else if (parsedDate < minDate || parsedDate > maxDate) {
+          notify("Please enter a date between 11/01/1999 and " + maxDate.toLocaleDateString('en-US', {timeZone: 'UTC'})); 
+        }
+        else {
+          body.style.overflow = "auto";
+          modal.style.display = "none";
+          start(parsedDate);
+        }
+      }
+
       var notificationBar = document.getElementById('notification_bar');
       var animate;
 
@@ -110,7 +156,7 @@
         }
         document.getElementById("notification_text").innerHTML = text;
         notificationBar.classList.add('fade');
-        animate = await setTimeout(function(){notificationBar.classList.remove('fade')}, 3000);
+        animate = await setTimeout(function(){notificationBar.classList.remove('fade')}, 4000);
       }
 
       const apiKey = "SK92GYM09TPNS82E";
@@ -122,19 +168,16 @@
       var userStocks = {};
       var date;
 
-      initialLoad();
-
-      async function initialLoad() {
+      async function start(initialDate) {
         await getValidDates();
-        date = new Date();
-        date.setDate(date.getDate() - 366);
-        while (!(date.toISOString().substring(0,10) in validDates)) {
-          date.setDate(date.getDate() + 1);
+        while (!(initialDate.toISOString().substring(0,10) in validDates)) {
+          initialDate.setDate(initialDate.getDate() + 1);
         }
+        date = initialDate;
         if (await updateTicker("AAPL")) {
           updateGraph("AAPL");
         }
-        document.getElementById("current_date").innerHTML = date.toLocaleDateString();
+        document.getElementById("current_date").innerHTML = date.toLocaleDateString('en-US', {timeZone: 'UTC'});
         document.getElementById("days_remaining").innerHTML = daysRemaining;
         document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
         document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
@@ -144,8 +187,8 @@
       async function getValidDates() {
         const url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&outputsize=full&apikey=" + apiKey;
         const dates = await fetch(url)
-        .then(response => response.json())
-        .then(data => data["Time Series (Daily)"]);
+          .then(response => response.json())
+          .then(data => data["Time Series (Daily)"]);
         validDates = dates;
         return;
       }
@@ -160,7 +203,7 @@
         updateGraph(currentTicker);
         prevDayAssets = cashAvailable + portfolioValue;
         updatePortfolioValue();
-        document.getElementById("current_date").innerHTML = date.toLocaleDateString();
+        document.getElementById("current_date").innerHTML = date.toLocaleDateString('en-US', {timeZone: 'UTC'});
         document.getElementById("days_remaining").innerHTML = daysRemaining;
         document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
         document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
@@ -171,8 +214,6 @@
         document.getElementById("24hr_change_percent").innerHTML = (100 * oneDayChange / prevDayAssets).toFixed(2);
         document.getElementById("total_change_dollars").innerHTML = totalChange.toFixed(2);
         document.getElementById("total_change_percent").innerHTML = (100 * totalChange / 5000).toFixed(2);
-        // TODO: erase this when buy/sell implemented
-        document.getElementById("num_shares").innerHTML = userStocks[currentTicker].shares;
         document.getElementById("shares_dollars").innerHTML = (userStocks[currentTicker].shares * getCurrentPrice(currentTicker)).toFixed(2);
       }
 
@@ -331,7 +372,7 @@
 
         for (var key in jsonData) {
           if (jsonData.hasOwnProperty(key)) {
-            if (Date.parse(key) < date) {
+            if (Date.parse(key) <= date) {
               trace.x.push(key);
               trace.y.push(jsonData[key]['5. adjusted close']);
             }
@@ -340,7 +381,7 @@
 
         // a week ago
         var date1 = new Date(date);
-        date1.setDate(date1.getDate() - 7);
+        date1.setDate(date1.getDate() - 30);
 
         min = 0;
         max = 0;
@@ -349,7 +390,6 @@
 
         for (var i = new Date(date1); i <= date; i.setDate(i.getDate() + 1)) {
           dateString = i.toISOString().substring(0,10);
-          console.log(dateString);
           if (dateString in jsonData) {
             closePrice = Number(jsonData[dateString]['5. adjusted close']);
             if (first == 0) {
