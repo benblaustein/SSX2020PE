@@ -28,19 +28,36 @@
       <h1 id="current_ticker">$AAPL</h1>
       <h4 id="current_stock">Apple Inc</h4>
       <hr style="border: 1.5px solid white">
+      <div id="enter_ticker">Enter a new stock symbol: <input id="new_ticker"><button type="button" id="search_ticker" onclick="updateAll()">Search</button></div>
+        <script>
+          var input = document.getElementById("new_ticker");
+          input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+              event.preventDefault();
+              document.getElementById("search_ticker").click();
+            }
+          });
+        </script>
+      <hr style="border: 1.5px solid white">
       <p id="current_holdings">Current holdings: <span id="num_shares">0</span> shares</p>
-      <p id="shares_value">Total value of shares: $<span id="shares_dollars">0</span></p>
-      <form id="buy_sell">
-        <input type="radio" id="buy" name="buy_or_sell" value="buy" checked>
-        <label for="buy">Buy</label>
-        <input type="radio" id="sell" name="buy_or_sell" value="sell">
-        <label for="sell">Sell</label>
+      <p id="shares_value">Total value of shares: $<span id="shares_dollars">0.00</span></p>
+        <form id="buy_sell">
+          <input type="radio" id="buy" name="buy_or_sell" checked>
+          <label for="buy">Buy</label>
+          <input type="radio" id="sell" name="buy_or_sell">
+          <label for="sell">Sell</label>
+        </form>
         <input id="buy_sell_shares" type="number">
         <span> shares<button type="button" id="confirm_sale" onclick="confirmSale()">Confirm</button></span>
-      </form>
-      <hr style="border: 1.5px solid white">
-      <div id="enter_ticker">Enter a new stock symbol: <input id="new_ticker"><button type="button" id="search_ticker" onclick="updateAll()">Search</button></div>
-
+        <script>
+          var input = document.getElementById("buy_sell_shares");
+          input.addEventListener("keyup", function(event) {
+            if (event.keyCode === 13) {
+              event.preventDefault();
+              document.getElementById("confirm_sale").click();
+            }
+          });
+        </script>
       <hr style="border: 1.5px solid white">
     </div>
 
@@ -48,56 +65,80 @@
       <div id="stats_time">
         <p>Current date: <span id="current_date"></span></p>
         <p>Days remaining: <span id="days_remaining"></span></p>
-        <p>24hr change: <span id="24hr_change_percent">0</span>%/$<span id="24hr_change_dollars">0</span></p>
-        <p>Overall change: <span id="total_change_percent">0</span>%/$<span id="total_change_dollars">0</span></p>
+        <p>24hr change: <span id="24hr_change_percent">0.00</span>%/$<span id="24hr_change_dollars">0.00</span></p>
+        <p>Overall change: <span id="total_change_percent">0.00</span>%/$<span id="total_change_dollars">0.00</span></p>
         <button id="advance_date" type="button" onclick="advanceDate()">Advance day</button>
       </div>
       <div id="stats_cash">
-        <p>Cash available: $<span id="cash_available">0</span></p>
-        <p>Portfolio value: $<span id="portfolio_value">0</span></p>
-        <p>Total assets: $<span id="total_assets">0</span></p>
+        <p>Cash available: $<span id="cash_available">0.00</span></p>
+        <p>Portfolio value: $<span id="portfolio_value">0.00</span></p>
+        <p>Total assets: $<span id="total_assets">0.00</span></p>
       </div>
       <div id="stats_holdings">
         <table id="holdings_table">
           <thead>
             <tr>
-              <th>Ticker</th>
+              <th>Stock</th>
               <th>Shares</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>AMZN</td>
-              <td>5</td>
-            </tr>
           </tbody>
         </table>
       </div>
     </div>
 
+    <div id="notification_bar">
+      <div id="notification_text">
+        Date advanced
+      </div>
+    </div>
+
     <script>
+      var notificationBar = document.getElementById('notification_bar');
+      var animate;
+
+      async function notify(text, type) {
+        clearTimeout(animate);
+        if (type == "log") {
+          notificationBar.classList.remove("error");
+          notificationBar.classList.add("log");
+        }
+        else {
+          notificationBar.classList.remove("log");
+          notificationBar.classList.add("error");
+        }
+        document.getElementById("notification_text").innerHTML = text;
+        notificationBar.classList.add('fade');
+        animate = await setTimeout(function(){notificationBar.classList.remove('fade')}, 3000);
+      }
+
       const apiKey = "SK92GYM09TPNS82E";
-      var date = new Date();
-      date.setDate(date.getDate() - 365);
       var daysRemaining = 365;
       var cashAvailable = 5000;
       var portfolioValue = 0;
       var currentTicker = "AAPL";
       var validDates;
       var userStocks = {};
-      getValidDates();
+      var date;
 
       initialLoad();
 
       async function initialLoad() {
+        await getValidDates();
+        date = new Date();
+        date.setDate(date.getDate() - 366);
+        while (!(date.toISOString().substring(0,10) in validDates)) {
+          date.setDate(date.getDate() + 1);
+        }
         if (await updateTicker("AAPL")) {
           updateGraph("AAPL");
         }
         document.getElementById("current_date").innerHTML = date.toLocaleDateString();
         document.getElementById("days_remaining").innerHTML = daysRemaining;
-        document.getElementById("cash_available").innerHTML = cashAvailable;
-        document.getElementById("portfolio_value").innerHTML = portfolioValue;
-        document.getElementById("total_assets").innerHTML = cashAvailable + portfolioValue;
+        document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
+        document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
+        document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
       }
 
       async function getValidDates() {
@@ -106,6 +147,7 @@
         .then(response => response.json())
         .then(data => data["Time Series (Daily)"]);
         validDates = dates;
+        return;
       }
 
       function advanceDate() {
@@ -120,49 +162,74 @@
         updatePortfolioValue();
         document.getElementById("current_date").innerHTML = date.toLocaleDateString();
         document.getElementById("days_remaining").innerHTML = daysRemaining;
-        document.getElementById("cash_available").innerHTML = Math.round(cashAvailable * 100) / 100;
-        document.getElementById("portfolio_value").innerHTML = Math.round(portfolioValue * 100) / 100;
-        document.getElementById("total_assets").innerHTML = Math.round(100 * (cashAvailable + portfolioValue)) / 100;
+        document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
+        document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
+        document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
         var oneDayChange = cashAvailable + portfolioValue - prevDayAssets;
         var totalChange = cashAvailable + portfolioValue - 5000;
-        document.getElementById("24hr_change_dollars").innerHTML = Math.round(oneDayChange * 100) / 100;
-        document.getElementById("24hr_change_percent").innerHTML = Math.round(10000 * oneDayChange / prevDayAssets) / 100;
-        document.getElementById("total_change_dollars").innerHTML = Math.round(totalChange * 100) / 100;
-        document.getElementById("total_change_percent").innerHTML = Math.round(10000 * totalChange / 5000) / 100;
+        document.getElementById("24hr_change_dollars").innerHTML = oneDayChange.toFixed(2);
+        document.getElementById("24hr_change_percent").innerHTML = (100 * oneDayChange / prevDayAssets).toFixed(2);
+        document.getElementById("total_change_dollars").innerHTML = totalChange.toFixed(2);
+        document.getElementById("total_change_percent").innerHTML = (100 * totalChange / 5000).toFixed(2);
         // TODO: erase this when buy/sell implemented
         document.getElementById("num_shares").innerHTML = userStocks[currentTicker].shares;
-        document.getElementById("shares_dollars").innerHTML = Math.round(userStocks[currentTicker].shares * getCurrentPrice(currentTicker) * 100) / 100;
+        document.getElementById("shares_dollars").innerHTML = (userStocks[currentTicker].shares * getCurrentPrice(currentTicker)).toFixed(2);
       }
 
       function getCurrentPrice(ticker) {
-        return userStocks[ticker].timeSeries[date.toISOString().substring(0,10)]['5. adjusted close'];
+        return Number(userStocks[ticker].timeSeries[date.toISOString().substring(0,10)]['5. adjusted close']);
       }
 
       function confirmSale() {
         numShares = Number(document.getElementById("buy_sell_shares").value);
         document.getElementById("buy_sell_shares").value = "";
         if (!Number.isInteger(numShares) || numShares < 1) {
-          console.error("invalid number of shares specified");
+          notify("Invalid number of shares specified", "error");
           return;
         }
         if (document.getElementById("buy").checked) {
           if (getCurrentPrice(currentTicker) * numShares <= cashAvailable) {
             cashAvailable -= getCurrentPrice(currentTicker) * numShares;
             userStocks[currentTicker].shares += numShares;
+            notify("Purchased " + numShares + " shares of $" + currentTicker + " at $" + getCurrentPrice(currentTicker).toFixed(2), "log");
+          }
+          else {
+            notify("Insufficient funds", "error");
           }
         }
         else {
           if (numShares <= userStocks[currentTicker].shares) {
             cashAvailable += getCurrentPrice(currentTicker) * numShares;
             userStocks[currentTicker].shares -= numShares;
+            notify("Sold " + numShares + " shares of $" + currentTicker + " at $" + getCurrentPrice(currentTicker).toFixed(2), "log");
+          }
+          else {
+            notify("Insufficient shares", "error");
           }
         }
         updatePortfolioValue();
         document.getElementById("num_shares").innerHTML = userStocks[currentTicker].shares;
-        document.getElementById("shares_dollars").innerHTML = Math.round(userStocks[currentTicker].shares * getCurrentPrice(currentTicker) * 100) / 100;
-        document.getElementById("cash_available").innerHTML = Math.round(cashAvailable * 100) / 100;
-        document.getElementById("portfolio_value").innerHTML = Math.round(portfolioValue * 100) / 100;
-        document.getElementById("total_assets").innerHTML = Math.round(100 * (cashAvailable + portfolioValue)) / 100;
+        document.getElementById("shares_dollars").innerHTML = (userStocks[currentTicker].shares * getCurrentPrice(currentTicker)).toFixed(2);
+        document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
+        document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
+        document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
+        if (document.getElementById(currentTicker) == null && userStocks[currentTicker].shares != 0) {
+          var table = document.getElementById("holdings_table");
+          var row = table.insertRow(1);
+          row.setAttribute("id", currentTicker);
+          var cell1 = row.insertCell(0);
+          cell1.innerHTML = currentTicker;
+          var cell2 = row.insertCell(1);
+          cell2.innerHTML = userStocks[currentTicker].shares;
+        }
+        else {
+          if (userStocks[currentTicker].shares == 0) {
+            var row = document.getElementById(currentTicker);
+            row.parentNode.removeChild(row);
+          }
+          var cell = document.getElementById(currentTicker).getElementsByTagName("td")[1];
+          cell.innerHTML = userStocks[currentTicker].shares;
+        }
       }
 
       function updatePortfolioValue() {
@@ -198,7 +265,6 @@
       }
 
       async function updateTicker(ticker) {
-        console.log("updating ticker");
 
         // if ticker absent in local storage
 
@@ -224,11 +290,11 @@
             document.getElementById("current_ticker").innerHTML = "$" + ticker;
             document.getElementById("current_stock").innerHTML = name;
             document.getElementById("num_shares").innerHTML = 0;
-            document.getElementById("shares_dollars").innerHTML = 0;
+            document.getElementById("shares_dollars").innerHTML = "0.00";
             return true;
           }
           else {
-            console.error("ticker " + ticker +  " does not exist");
+            notify("Unable to get data for $" + ticker, "error");
             return false;
           }
         }
@@ -239,7 +305,7 @@
           document.getElementById("current_ticker").innerHTML = "$" + ticker;
           document.getElementById("current_stock").innerHTML = userStocks[ticker].name;
           document.getElementById("num_shares").innerHTML = userStocks[ticker].shares;
-          document.getElementById("shares_dollars").innerHTML = Math.round(userStocks[ticker].shares * getCurrentPrice(ticker) * 100) / 100;
+          document.getElementById("shares_dollars").innerHTML = (userStocks[ticker].shares * getCurrentPrice(ticker)).toFixed(2);
           return true;
         }
         else {
@@ -248,12 +314,8 @@
       }
 
       async function updateGraph(ticker) {
-        console.log("updating graph");
         if (!(ticker in userStocks)) {
-          console.error("don't get here!");
-        }
-        else {
-          console.log("ticker " + ticker + " found, getting data from storage");
+          console.error("ticker not found in storage");
         }
         jsonData = userStocks[ticker].timeSeries;
 
@@ -268,10 +330,12 @@
         var data = [trace];
 
         for (var key in jsonData) {
-            if (jsonData.hasOwnProperty(key)) {
-                trace.x.push(key);
-                trace.y.push(jsonData[key]['5. adjusted close']);
+          if (jsonData.hasOwnProperty(key)) {
+            if (Date.parse(key) < date) {
+              trace.x.push(key);
+              trace.y.push(jsonData[key]['5. adjusted close']);
             }
+          }
         }
 
         // a week ago
@@ -285,8 +349,9 @@
 
         for (var i = new Date(date1); i <= date; i.setDate(i.getDate() + 1)) {
           dateString = i.toISOString().substring(0,10);
+          console.log(dateString);
           if (dateString in jsonData) {
-            closePrice = jsonData[dateString]['5. adjusted close'];
+            closePrice = Number(jsonData[dateString]['5. adjusted close']);
             if (first == 0) {
               min = closePrice;
               max = closePrice;

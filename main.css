@@ -95,7 +95,9 @@ input:focus {
 }
 
 #buy_sell {
-  margin: 15px;
+  margin: 0px 15px 15px 15px;
+  display: inline-block;
+  margin-right: 0;
 }
 
 #buy_sell_shares {
@@ -116,14 +118,13 @@ input:focus {
   display: inline-block;
   border: none;
   border-radius: 0;
-  background: gray;
-  color: white;
+  background: white;
+  color: #003;
   font-size: 16px;
   font-family: 'Roboto Mono';
   cursor: pointer;
   border-radius: 2px;
   margin: 0px 10px;
-  border: 1px white solid;
 }
 
 #confirm_sale:focus { 
@@ -131,7 +132,7 @@ input:focus {
 }
 
 #confirm_sale:active {
-  background: #444;
+  background: #ddd;
 }
 
 #enter_ticker {
@@ -157,14 +158,13 @@ input:focus {
   display: inline-block;
   border: none;
   border-radius: 0;
-  background: gray;
-  color: white;
+  background: white;
+  color: #003;
   font-size: 16px;
   font-family: 'Roboto Mono';
   cursor: pointer;
   border-radius: 2px;
   margin: 0px 10px;
-  border: 1px white solid;
 }
 
 #search_ticker:focus { 
@@ -172,7 +172,7 @@ input:focus {
 }
 
 #search_ticker:active {
-  background: #444;
+  background: #ddd;
 }
 
 #holdings {
@@ -198,16 +198,14 @@ input:focus {
   width: 150px;
   height: 34px;
   display: inline-block;
-  border: none;
-  border-radius: 0;
-  background: gray;
-  color: white;
+  background: white;
+  color: #003;
   font-size: 16px;
   font-family: 'Roboto Mono';
   cursor: pointer;
   border-radius: 2px;
   margin: 0px 10px;
-  border: 1px white solid;
+  border: none;
 }
 
 #advance_date:focus {
@@ -215,7 +213,7 @@ input:focus {
 }
 
 #advance_date:active {
-  background: #444;
+  background: #ddd;
 }
 
 #stats_cash {
@@ -230,27 +228,24 @@ input:focus {
 
 #stats_holdings {
   display: inline-block;
-  width: calc(20% - 2px);
-  height: 299px;
+  width: calc(20% - 6px);
+  height: 295px;
   vertical-align: top;
   text-align: center;
   overflow: auto;
   font-size: 20px;
-  border-bottom: 1px solid white;
+  border: 3px solid white;
 }
 
 #holdings_table {
-  padding-top: 10px;
   text-align: center;
   table-layout: fixed;
-  height: 150px;
   border-collapse: separate;
   border-spacing: 0;
-  padding: 0;
 }
 
 #holdings_table th, td {
-  border: 1px solid white;
+  border-bottom: 1px solid white;
   width: 20%;
   height: 40px;
 }
@@ -260,4 +255,37 @@ input:focus {
   top: 0px;
   background: #003;
   color: lime;
+}
+
+#notification_bar {
+  display: block;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  opacity: 0;
+  visibility: hidden;
+  transition: visibility 0s 1s, opacity 1s linear;
+}
+
+#notification_bar.fade {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1s linear;
+}
+
+#notification_text {
+  color: #003;
+  text-align: center;
+  font-size: 16px;
+  padding: 12.5px;
+}
+
+.error {
+  background-color: red;
+}
+
+.log {
+  background-color: lime;
 }

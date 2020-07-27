@@ -36,28 +36,25 @@ input {
   margin-bottom: 5px;
   font-size: 16px;
   font-family: 'Roboto Mono';
-  color: #555;
-  background-color: #dfdfdf;
-  border-style: solid;
-  border-color: #777;
-  border-width: 2px;
+  color: white;
+  background-color: #003;
+  border: 1px solid white;
   font-weight: 200;
   text-indent: 5px;
 }
 
 input:focus {
   outline: none;
-  background-color: #fff;
 }
 
 #login_button {
-  width: 228px;
-  height: 43px;
+  width: 226px;
+  height: 41px;
   display: block;
   border: none;
-  border-radius: 0;
-  background: #777;
-  color: white;
+  border-radius: 2px;
+  background: white;
+  color: #003;
   font-size: 16px;
   margin: auto;
   font-family: 'Roboto Mono';
@@ -70,7 +67,7 @@ input:focus {
 }
 
 #login_button:active {
-  background: #444;
+  background: #ddd;
 }
 
 #create_account {
