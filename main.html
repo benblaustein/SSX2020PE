@@ -9,15 +9,15 @@
 
   <body>
     <div id="navbar">
-      <h2>SSX2020PE™</h2>
+      <a href="main.html" id="logo">SSX2020PE™</a>
       <div id="navmenu">
-        <a href="">About</a>
+        <a href="about.html">About</a>
         <span>|</span>
-        <a href="">Account</a>
+        <a href="account.html">Account</a>
         <span>|</span>
-        <a href="">Help</a>
+        <a href="help.html">Help</a>
         <span>|</span>
-        <a href="">Logout</a>
+        <a onclick="logout()" href="javascript:void(0);">Logout</a>
       </div>
     </div>
 
@@ -41,25 +41,9 @@
       <hr style="border: 1.5px solid white">
       <p id="current_holdings">Current holdings: <span id="num_shares">0</span> shares</p>
       <p id="shares_value">Total value of shares: $<span id="shares_dollars">0.00</span></p>
-        <form id="buy_sell">
-          <input type="radio" id="buy" name="buy_or_sell" checked>
-          <label for="buy">Buy</label>
-          <input type="radio" id="sell" name="buy_or_sell">
-          <label for="sell">Sell</label>
-        </form>
-        <input id="buy_sell_shares" type="number">
-        <span> shares<button type="button" id="confirm_sale" onclick="confirmSale()">Confirm</button></span>
-        <script>
-          var input = document.getElementById("buy_sell_shares");
-          input.addEventListener("keyup", function(event) {
-            if (event.keyCode === 13) {
-              event.preventDefault();
-              document.getElementById("confirm_sale").click();
-            }
-          });
-        </script>
+        <input id="buy_sell_shares" type="number" placeholder="# shares">
+        <button class="transaction_button" onclick="buy()">Buy</button><button class="transaction_button" onclick="sell()">Sell</button><button class="transaction_button" onclick="buyMax()">Buy max</button><button class="transaction_button" onclick="sellAll()">Sell all</button>
       <hr style="border: 1.5px solid white">
-      <button id="advance_date" type="button" onclick="advanceDate()">Advance day</button>
     </div>
 
     <div id="holdings">
@@ -73,6 +57,7 @@
         <p>Cash available: $<span id="cash_available">0.00</span></p>
         <p>Portfolio value: $<span id="portfolio_value">0.00</span></p>
         <p>Total assets: $<span id="total_assets">0.00</span></p>
+        <button id="advance_date" onclick="advanceDate()">Advance day</button>
       </div>
       <div id="stats_holdings">
         <table id="holdings_table">
@@ -97,7 +82,8 @@
       <div class="modal-content">
         <p>Select a date to begin:</p>
         <input id="pick_date" type="date" min="1999-11-01"><br><br>
-        <button id="submit_date">Submit</button>
+        <button id="submit_date">Submit</button><br><br>
+        <button id="random_date">Random date</button>
       </div>
     </div>
     <script>
@@ -110,340 +96,22 @@
       });
     </script>
 
+    <script src="main.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-auth.js"></script>
     <script>
-
-      var modal = document.getElementById("calendarModal");
-      var button = document.getElementById("submit_date");
-      var body = document.getElementsByTagName("body")[0];
-      window.onload = function() {
-        modal.style.display = "block";
-        body.style.overflow = "hidden";
-        date = new Date();
-        date.setDate(date.getDate() - 370);
-        document.getElementById("pick_date").setAttribute("max", date.toISOString().substring(0,10));
-      }
-      button.onclick = function() {
-        date = document.getElementById("pick_date").value;
-        parsedDate = new Date(date);
-        maxDate = new Date();
-        maxDate.setDate(maxDate.getDate() - 370);
-        minDate = new Date("1999-11-01");
-        if (date == "") {
-          notify("Please enter a date");
-        }
-        else if (parsedDate < minDate || parsedDate > maxDate) {
-          notify("Please enter a date between 11/01/1999 and " + maxDate.toLocaleDateString('en-US', {timeZone: 'UTC'})); 
-        }
-        else {
-          body.style.overflow = "auto";
-          modal.style.display = "none";
-          start(parsedDate);
-        }
-      }
-
-      var notificationBar = document.getElementById('notification_bar');
-      var animate;
-
-      async function notify(text, type) {
-        clearTimeout(animate);
-        if (type == "log") {
-          notificationBar.classList.remove("error");
-          notificationBar.classList.add("log");
-        }
-        else {
-          notificationBar.classList.remove("log");
-          notificationBar.classList.add("error");
-        }
-        document.getElementById("notification_text").innerHTML = text;
-        notificationBar.classList.add('fade');
-        animate = await setTimeout(function(){notificationBar.classList.remove('fade')}, 4000);
-      }
-
-      const apiKey = "SK92GYM09TPNS82E";
-      var daysRemaining = 365;
-      var cashAvailable = 5000;
-      var portfolioValue = 0;
-      var currentTicker = "AAPL";
-      var validDates;
-      var userStocks = {};
-      var date;
-
-      async function start(initialDate) {
-        await getValidDates();
-        while (!(initialDate.toISOString().substring(0,10) in validDates)) {
-          initialDate.setDate(initialDate.getDate() + 1);
-        }
-        date = initialDate;
-        if (await updateTicker("AAPL")) {
-          updateGraph("AAPL");
-        }
-        document.getElementById("current_date").innerHTML = date.toLocaleDateString('en-US', {timeZone: 'UTC'});
-        document.getElementById("days_remaining").innerHTML = daysRemaining;
-        document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
-        document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
-        document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
-      }
-
-      async function getValidDates() {
-        const url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&outputsize=full&apikey=" + apiKey;
-        const dates = await fetch(url)
-          .then(response => response.json())
-          .then(data => data["Time Series (Daily)"]);
-        validDates = dates;
-        return;
-      }
-
-      function advanceDate() {
-        date.setDate(date.getDate() + 1);
-        daysRemaining--;
-        while (!(date.toISOString().substring(0,10) in validDates)) {
-          date.setDate(date.getDate() + 1);
-          daysRemaining--;
-        }
-        updateGraph(currentTicker);
-        prevDayAssets = cashAvailable + portfolioValue;
-        updatePortfolioValue();
-        document.getElementById("current_date").innerHTML = date.toLocaleDateString('en-US', {timeZone: 'UTC'});
-        document.getElementById("days_remaining").innerHTML = daysRemaining;
-        document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
-        document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
-        document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
-        var oneDayChange = cashAvailable + portfolioValue - prevDayAssets;
-        var totalChange = cashAvailable + portfolioValue - 5000;
-        document.getElementById("24hr_change_dollars").innerHTML = oneDayChange.toFixed(2);
-        document.getElementById("24hr_change_percent").innerHTML = (100 * oneDayChange / prevDayAssets).toFixed(2);
-        document.getElementById("total_change_dollars").innerHTML = totalChange.toFixed(2);
-        document.getElementById("total_change_percent").innerHTML = (100 * totalChange / 5000).toFixed(2);
-        document.getElementById("shares_dollars").innerHTML = (userStocks[currentTicker].shares * getCurrentPrice(currentTicker)).toFixed(2);
-      }
-
-      function getCurrentPrice(ticker) {
-        return Number(userStocks[ticker].timeSeries[date.toISOString().substring(0,10)]['5. adjusted close']);
-      }
-
-      function confirmSale() {
-        numShares = Number(document.getElementById("buy_sell_shares").value);
-        document.getElementById("buy_sell_shares").value = "";
-        if (!Number.isInteger(numShares) || numShares < 1) {
-          notify("Invalid number of shares specified", "error");
-          return;
-        }
-        if (document.getElementById("buy").checked) {
-          if (getCurrentPrice(currentTicker) * numShares <= cashAvailable) {
-            cashAvailable -= getCurrentPrice(currentTicker) * numShares;
-            userStocks[currentTicker].shares += numShares;
-            notify("Purchased " + numShares + " shares of $" + currentTicker + " at $" + getCurrentPrice(currentTicker).toFixed(2), "log");
-          }
-          else {
-            notify("Insufficient funds", "error");
-          }
-        }
-        else {
-          if (numShares <= userStocks[currentTicker].shares) {
-            cashAvailable += getCurrentPrice(currentTicker) * numShares;
-            userStocks[currentTicker].shares -= numShares;
-            notify("Sold " + numShares + " shares of $" + currentTicker + " at $" + getCurrentPrice(currentTicker).toFixed(2), "log");
-          }
-          else {
-            notify("Insufficient shares", "error");
-          }
-        }
-        updatePortfolioValue();
-        document.getElementById("num_shares").innerHTML = userStocks[currentTicker].shares;
-        document.getElementById("shares_dollars").innerHTML = (userStocks[currentTicker].shares * getCurrentPrice(currentTicker)).toFixed(2);
-        document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
-        document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
-        document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
-        if (document.getElementById(currentTicker) == null && userStocks[currentTicker].shares != 0) {
-          var table = document.getElementById("holdings_table");
-          var row = table.insertRow(1);
-          row.setAttribute("id", currentTicker);
-          var cell1 = row.insertCell(0);
-          cell1.innerHTML = currentTicker;
-          var cell2 = row.insertCell(1);
-          cell2.innerHTML = userStocks[currentTicker].shares;
-        }
-        else {
-          if (userStocks[currentTicker].shares == 0) {
-            var row = document.getElementById(currentTicker);
-            row.parentNode.removeChild(row);
-          }
-          var cell = document.getElementById(currentTicker).getElementsByTagName("td")[1];
-          cell.innerHTML = userStocks[currentTicker].shares;
-        }
-      }
-
-      function updatePortfolioValue() {
-        val = 0;
-        for (var key in userStocks) {
-          if (typeof userStocks[key].timeSeries[date.toISOString().substring(0,10)] !== 'undefined') {
-            numShares = userStocks[key].shares;
-            sharePrice = getCurrentPrice(key);
-            val += numShares * sharePrice
-          }
-        }
-        portfolioValue = val;
-      }
-
-      async function updateAll() {
-        var ticker = document.getElementById("new_ticker").value.toUpperCase();
-        document.getElementById("new_ticker").value = "";
-
-        // TODO replace with better validation/trimming
-        if (ticker.length == 0) {
-          return;
-        }
-        if (ticker.charAt(0) == '$') {
-          ticker = ticker.substring(1, ticker.length);
-        }
-        if (ticker.length == 0) {
-          return;
-        }
-
-        if (await updateTicker(ticker)) {
-          updateGraph(ticker);
-        }
-      }
-
-      async function updateTicker(ticker) {
-
-        // if ticker absent in local storage
-
-        // TODO: abstract into another method
-        if (!(ticker in userStocks)) {
-          url = "https://www.alphavantage.co/query?function=OVERVIEW&symbol=" + ticker + "&apikey=" + apiKey;
-          let name = await fetch(url)
-            .then(response => response.json())
-            .then(data => data.Name);
-
-          if (typeof name !== 'undefined') {
-            console.log("ticker " + ticker + " found, saving data from alphavantage");
-            url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=" + ticker + "&outputsize=full&apikey=" + apiKey;
-            let timeSeries = await fetch(url)
-              .then(response => response.json())
-              .then(data => data["Time Series (Daily)"]);
-            userStocks[ticker] = {
-              shares: 0,
-              name: name,
-              timeSeries: timeSeries
-            }
-            currentTicker = ticker;
-            document.getElementById("current_ticker").innerHTML = "$" + ticker;
-            document.getElementById("current_stock").innerHTML = name;
-            document.getElementById("num_shares").innerHTML = 0;
-            document.getElementById("shares_dollars").innerHTML = "0.00";
-            return true;
-          }
-          else {
-            notify("Unable to get data for $" + ticker, "error");
-            return false;
-          }
-        }
-
-        // if ticker present in local storage
-        if (typeof userStocks[ticker].name !== 'undefined') {
-          currentTicker = ticker;
-          document.getElementById("current_ticker").innerHTML = "$" + ticker;
-          document.getElementById("current_stock").innerHTML = userStocks[ticker].name;
-          document.getElementById("num_shares").innerHTML = userStocks[ticker].shares;
-          document.getElementById("shares_dollars").innerHTML = (userStocks[ticker].shares * getCurrentPrice(ticker)).toFixed(2);
-          return true;
-        }
-        else {
-          return false;
-        }
-      }
-
-      async function updateGraph(ticker) {
-        if (!(ticker in userStocks)) {
-          console.error("ticker not found in storage");
-        }
-        jsonData = userStocks[ticker].timeSeries;
-
-        var trace = {
-          type: "scatter",
-          mode: "lines",
-          x: [],
-          y: [],
-          line: {color: 'lime'}
-        }
-
-        var data = [trace];
-
-        for (var key in jsonData) {
-          if (jsonData.hasOwnProperty(key)) {
-            if (Date.parse(key) <= date) {
-              trace.x.push(key);
-              trace.y.push(jsonData[key]['5. adjusted close']);
-            }
-          }
-        }
-
-        // a week ago
-        var date1 = new Date(date);
-        date1.setDate(date1.getDate() - 30);
-
-        min = 0;
-        max = 0;
-        first = 0;
-        last = 0;
-
-        for (var i = new Date(date1); i <= date; i.setDate(i.getDate() + 1)) {
-          dateString = i.toISOString().substring(0,10);
-          if (dateString in jsonData) {
-            closePrice = Number(jsonData[dateString]['5. adjusted close']);
-            if (first == 0) {
-              min = closePrice;
-              max = closePrice;
-              first = closePrice;
-            }
-            if (closePrice < min) {
-              min = closePrice;
-            }
-            if (closePrice > max) {
-              max = closePrice;
-            }
-            last = closePrice;
-          }
-        }
-
-        if (first > last) {
-          trace.line.color = 'red';
-        }
-
-        var layout = {
-          title: '$' + ticker + ' Stock Price',
-          paper_bgcolor: '#003',
-          plot_bgcolor: '#003',
-          font: {
-            family: 'Roboto Mono, monospace',
-            color: '#fff'
-          },
-          coloraxis: {
-            colorbar: {
-              tickcolor: '#fff',
-              showticklabels: false
-            }
-          },
-          titlefont: {
-            size: 30
-          },
-          xaxis: {
-            range: [date1, date],
-            gridcolor: '#335'
-          },
-          yaxis: {
-            range: [min, max],
-            gridcolor: '#335'
-          }
-        };
-
-        var config = {
-          responsive: true
-        }
-
-        Plotly.newPlot('graphic', data, layout, config);
-      }
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAUvP6E7QP-b33l4u0TWipFO3Bb_pndnGA",
+        authDomain: "ssx2020pe.firebaseapp.com",
+        databaseURL: "https://ssx2020pe.firebaseio.com",
+        projectId: "ssx2020pe",
+        storageBucket: "ssx2020pe.appspot.com",
+        messagingSenderId: "398681056650",
+        appId: "1:398681056650:web:2276050bf886aa50465473"
+      };
+      // Initialize Firebase
+      var app = firebase.initializeApp(firebaseConfig);
     </script>
   </body>
 </html>

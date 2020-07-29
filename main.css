@@ -8,11 +8,12 @@ body {
   color: white;
 }
 
-h2 {
+#logo {
   display: inline-block;
   font-size: 40px;
   color: lime;
   margin: 7px 20px;
+  text-decoration: none;
 }
 
 input:focus {
@@ -21,6 +22,27 @@ input:focus {
 
 input {
   font-weight: 200;
+}
+
+button {
+  height: 34px;
+  display: inline-block;
+  border: none;
+  border-radius: 0;
+  background: white;
+  color: #003;
+  font-size: 16px;
+  font-family: 'Roboto Mono';
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+button:focus { 
+  outline: none;
+}
+
+button:active {
+  background: #ddd;
 }
 
 #navbar {
@@ -59,6 +81,7 @@ input {
   width: calc(59.5% - 9px);
   height: 500px;
   float: left;
+  border-radius: 8px;
 }
 
 #menu {
@@ -67,6 +90,7 @@ input {
   width: calc(39.5% - 9px);
   height: 500px;
   float: right;
+  border-radius: 8px;
 }
 
 #current_ticker {
@@ -98,45 +122,21 @@ input {
   margin: 15px 20px;
 }
 
-#buy_sell {
-  margin: 0px 15px 15px 15px;
+.transaction_button {
+  margin: 0px 10px 10px 0px;
   display: inline-block;
-  margin-right: 0;
 }
 
 #buy_sell_shares {
-  width: 60px;
+  width: 100px;
   height: 30px;
-  margin-bottom: 5px;
+  margin: 0 0 0 20px;
   font-size: 16px;
   font-family: 'Roboto Mono';
   color: white;
   background-color: #003;
   border: white 1px solid;
   text-indent: 5px;
-}
-
-#confirm_sale {
-  width: 85px;
-  height: 34px;
-  display: inline-block;
-  border: none;
-  border-radius: 0;
-  background: white;
-  color: #003;
-  font-size: 16px;
-  font-family: 'Roboto Mono';
-  cursor: pointer;
-  border-radius: 2px;
-  margin: 0px 10px;
-}
-
-#confirm_sale:focus { 
-  outline: none;
-}
-
-#confirm_sale:active {
-  background: #ddd;
 }
 
 #enter_ticker {
@@ -146,37 +146,17 @@ input {
 #enter_ticker input {
   width: 70px;
   height: 30px;
-  margin-bottom: 5px;
   font-size: 16px;
   font-family: 'Roboto Mono';
   color: white;
   background-color: #003;
   border: white 1px solid;
   text-indent: 5px;
-  text-transform:uppercase;
+  text-transform: uppercase;
 }
 
 #search_ticker {
-  width: 85px;
-  height: 34px;
-  display: inline-block;
-  border: none;
-  border-radius: 0;
-  background: white;
-  color: #003;
-  font-size: 16px;
-  font-family: 'Roboto Mono';
-  cursor: pointer;
-  border-radius: 2px;
-  margin: 0px 10px;
-}
-
-#search_ticker:focus { 
-  outline: none;
-}
-
-#search_ticker:active {
-  background: #ddd;
+  margin: 0 0 0 10px;
 }
 
 #holdings {
@@ -187,6 +167,7 @@ input {
   margin-top: calc(1% + 6px);
   font-size: 0;
   padding: 1%;
+  border-radius: 8px;
 }
 
 #stats_time {
@@ -199,25 +180,7 @@ input {
 }
 
 #advance_date {
-  width: 150px;
-  height: 34px;
-  display: inline-block;
-  background: white;
-  color: #003;
-  font-size: 16px;
-  font-family: 'Roboto Mono';
-  cursor: pointer;
-  border-radius: 2px;
   margin: 0px 10px;
-  border: none;
-}
-
-#advance_date:focus {
-  outline: none;
-}
-
-#advance_date:active {
-  background: #ddd;
 }
 
 #stats_cash {
@@ -232,13 +195,13 @@ input {
 
 #stats_holdings {
   display: inline-block;
-  width: calc(20% - 6px);
-  height: 295px;
+  width: calc(20% - 2px);
+  height: 299px;
   vertical-align: top;
   text-align: center;
   overflow: auto;
   font-size: 20px;
-  border: 3px solid white;
+  border: 1px solid white;
 }
 
 #holdings_table {
@@ -258,7 +221,7 @@ input {
   position: sticky;
   top: 0px;
   background: #003;
-  color: lime;
+  color: white;
 }
 
 #notification_bar {
@@ -316,7 +279,7 @@ input {
   padding: 20px;
   border: 3px solid white;
   width: 400px; /* Could be more or less, depending on screen size */
-  height: 200px;
+  height: 220px;
   text-align: center;
 }
 
@@ -332,22 +295,7 @@ input {
   text-indent: 5px;
 }
 
-#submit_date {
-  width: 80px;
-  height: 34px;
-  background: white;
+#holdings_table th {
+  background-color: white;
   color: #003;
-  font-size: 16px;
-  font-family: 'Roboto Mono';
-  cursor: pointer;
-  border-radius: 2px;
-  border: none;
-}
-
-#submit_date:focus {
-  outline: none;
-}
-
-#submit_date:active {
-  background-color: #ddd;
 }

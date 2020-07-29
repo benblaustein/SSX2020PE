@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <title>SSX2020PE™</title>
+  <head>
+    <link rel="stylesheet" href="account.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+
+  <body>
+    <div id="navbar">
+      <a href="main.html" id="logo">SSX2020PE™</a>
+      <div id="navmenu">
+        <a href="about.html">About</a>
+        <span>|</span>
+        <a href="account.html">Account</a>
+        <span>|</span>
+        <a href="help.html">Help</a>
+        <span>|</span>
+        <a onclick="logout()" href="javascript:void(0);">Logout</a>
+      </div>
+    </div>
+
+    <div id="content">
+      <input id="new_password" placeholder="New password" type="password"><button id="submit" onclick="updatePassword()">Update</button>
+      <br>
+      <button id="delete_account" onclick="deleteUser()">Delete account</button>
+    </div>
+
+    <div id="anonymous" style="display: none">
+      <p>You are currently using an anonymous account. To create an account, click the "Logout" button and create an account on the login page.</p>
+    </div>
+
+    <script>
+      function logout() {
+          firebase.auth().signOut();
+      }
+
+      function initApp() {
+        // Listening for auth state changes.
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            // User is signed in.
+            var displayName = user.displayName;
+            var email = user.email;
+            var emailVerified = user.emailVerified;
+            var photoURL = user.photoURL;
+            var isAnonymous = user.isAnonymous;
+            var uid = user.uid;
+            var providerData = user.providerData;
+
+            if (isAnonymous) {
+              document.getElementById("content").style.display = "none";
+              document.getElementById("anonymous").style.display = "block";
+            }
+          } else {
+            // User is signed out.
+            window.location.replace("index.html");
+          }
+        });
+      }
+
+      function updatePassword() {
+        var user = firebase.auth().currentUser;
+        var newPassword = document.getElementById("new_password").value;
+
+        if (newPassword.length < 4) {
+          alert('Please enter a password.');
+          return;
+        }
+
+        user.updatePassword(newPassword).then(function() {
+          // Update successful.
+        }).catch(function(error) {
+          // An error happened.
+          console.log(error);
+        });
+        alert("Password updated.");
+      }
+
+      function deleteUser() {
+        var user = firebase.auth().currentUser;
+        var result = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+
+        if (result) {
+          user.delete().then(function() {
+            // User deleted.
+          }).catch(function(error) {
+            // An error happened.
+          });
+        }
+      }
+
+      window.onload = function() {
+        initApp();
+      }
+    </script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-auth.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAUvP6E7QP-b33l4u0TWipFO3Bb_pndnGA",
+        authDomain: "ssx2020pe.firebaseapp.com",
+        databaseURL: "https://ssx2020pe.firebaseio.com",
+        projectId: "ssx2020pe",
+        storageBucket: "ssx2020pe.appspot.com",
+        messagingSenderId: "398681056650",
+        appId: "1:398681056650:web:2276050bf886aa50465473"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    </script>
+  </body>
+</html>

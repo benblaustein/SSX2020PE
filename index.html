@@ -10,28 +10,14 @@
     <h1>Stock Simulator Xtreme 2020 Pro Edition</h1>
 
     <div id="login">
-      <h2>Log in<span id="cursor">|</span></h2><br>
+      <h2 id="header">Log in</h2><br>
 
-      <script>
-          var cursor = true;
-          var speed = 500;
-          setInterval(() => {
-            if(cursor) {
-              document.getElementById('cursor').style.opacity = 0;
-              cursor = false;
-            }else {
-              document.getElementById('cursor').style.opacity = 1;
-              cursor = true;
-            }
-          }, speed);
-      </script>
-
-      <input type="text" placeholder="username" id="username"><br>
+      <input type="text" placeholder="email" id="email"><br>
       <input type="password" placeholder="password" id="password"><br>
-      <button onclick="document.location='main.html'" id="login_button">Sign in</button>
-      <a id="create_account" href="main.html">New? Create an account</a><br>
+      <button onclick="login()" id="login_button">Sign in</button>
+      <a id="create_account" href="javascript:void(0);" onclick="toggleLogin()">New? Create an account</a><br>
       <div class="or"><span style="font-family: 'Helvetica'">––––––––– </span>or<span style="font-family: 'Helvetica'"> –––––––––</span></div><br>
-      <a id="continue" href="main.html">Continue as a guest</a>
+      <a id="continue" href="javascript:void(0);" onclick="loginAnon()">Continue as a guest</a>
     </div>
 
     <script>
@@ -45,6 +31,142 @@
           }
         });
       };
+    </script>
+
+    <script>
+      function toggleLogin() {
+        button = document.getElementById("login_button");
+        link = document.getElementById("create_account");
+        header = document.getElementById("header");
+        if (button.innerHTML == "Sign in") {
+          button.setAttribute("onclick", "createAccount()");
+          button.innerHTML = "Create account";
+          link.innerHTML = "Returning user? Log in";
+          header.innerHTML = "Create an account";
+        }
+        else {
+          button.setAttribute("onclick", "login()");
+          button.innerHTML = "Sign in";
+          link.innerHTML = "New? Create an account";
+          header.innerHTML = "Log in";
+        }
+      }
+
+      function createAccount() {
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        if (email.length < 4) {
+          alert('Please enter an email address.');
+          return;
+        }
+        if (password.length < 4) {
+          alert('Please enter a password.');
+          return;
+        }
+        // Create user with email and pass.
+        // [START createwithemail]
+        firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // [START_EXCLUDE]
+          if (errorCode == 'auth/weak-password') {
+            alert('The password is too weak.');
+          } else {
+            alert(errorMessage);
+          }
+          console.log(error);
+          // [END_EXCLUDE]
+        });
+        // [END createwithemail]
+      }
+
+      function login() {
+        if (firebase.auth().currentUser) {
+        // [START signout]
+        firebase.auth().signOut();
+        // [END signout]
+      } else {
+        var email = document.getElementById('email').value;
+        var password = document.getElementById('password').value;
+        if (email.length < 4) {
+          alert('Please enter an email address.');
+          return;
+        }
+        if (password.length < 4) {
+          alert('Please enter a password.');
+          return;
+        }
+        // Sign in with email and pass.
+        // [START authwithemail]
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // [START_EXCLUDE]
+          if (errorCode === 'auth/wrong-password') {
+            alert('Wrong password.');
+          } else {
+            alert(errorMessage);
+          }
+          console.log(error);
+          // [END_EXCLUDE]
+        });
+        // [END authwithemail]
+      }
+    }
+
+    function loginAnon() {
+      firebase.auth().signInAnonymously().catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // [START_EXCLUDE]
+        if (errorCode === 'auth/operation-not-allowed') {
+          alert('You must enable Anonymous auth in the Firebase Console.');
+        } else {
+          console.error(error);
+        }
+        // [END_EXCLUDE]
+      });
+    }
+
+    function initApp() {
+      // Listening for auth state changes.
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          // User is signed in.
+          window.location.replace("main.html");
+        }
+      });
+    }
+
+    window.onload = function() {
+      initApp();
+    };
+
+    </script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+         https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-auth.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAUvP6E7QP-b33l4u0TWipFO3Bb_pndnGA",
+        authDomain: "ssx2020pe.firebaseapp.com",
+        databaseURL: "https://ssx2020pe.firebaseio.com",
+        projectId: "ssx2020pe",
+        storageBucket: "ssx2020pe.appspot.com",
+        messagingSenderId: "398681056650",
+        appId: "1:398681056650:web:2276050bf886aa50465473"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
     </script>
   </body>
 </html>

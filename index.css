@@ -24,9 +24,9 @@ h2 {
   position:    absolute;
   left:        50%;
   top:         50%;
-  width:       300px;
+  width:       350px;
   height:      350px;
-  margin-left: -150px;
+  margin-left: -175px;
   margin-top:  -175px;
 }
 
@@ -91,4 +91,13 @@ input:focus {
 
 p {
   color: white;
+}
+
+/* Change the white to any color ;) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active  {
+    -webkit-box-shadow: 0 0 0 30px #003 inset !important;
+    -webkit-text-fill-color: white !important;
 }

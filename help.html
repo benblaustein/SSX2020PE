@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <title>SSX2020PE™</title>
+  <head>
+    <link rel="stylesheet" href="help.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+
+  <body>
+    <div id="navbar">
+      <a href="main.html" id="logo">SSX2020PE™</a>
+      <div id="navmenu">
+        <a href="about.html">About</a>
+        <span>|</span>
+        <a href="account.html">Account</a>
+        <span>|</span>
+        <a href="help.html">Help</a>
+        <span>|</span>
+        <a onclick="logout()" href="javascript:void(0);">Logout</a>
+      </div>
+    </div>
+
+    WIP
+
+    <script>
+      function logout() {
+          firebase.auth().signOut();
+      }
+
+      function initApp() {
+        // Listening for auth state changes.
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            // User is signed in.
+            var displayName = user.displayName;
+            var email = user.email;
+            var emailVerified = user.emailVerified;
+            var photoURL = user.photoURL;
+            var isAnonymous = user.isAnonymous;
+            var uid = user.uid;
+            var providerData = user.providerData;
+          } else {
+            // User is signed out.
+            window.location.replace("index.html");
+          }
+        });
+      }
+
+      window.onload = function() {
+        initApp();
+      }
+    </script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-auth.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAUvP6E7QP-b33l4u0TWipFO3Bb_pndnGA",
+        authDomain: "ssx2020pe.firebaseapp.com",
+        databaseURL: "https://ssx2020pe.firebaseio.com",
+        projectId: "ssx2020pe",
+        storageBucket: "ssx2020pe.appspot.com",
+        messagingSenderId: "398681056650",
+        appId: "1:398681056650:web:2276050bf886aa50465473"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    </script>
+  </body>
+</html>

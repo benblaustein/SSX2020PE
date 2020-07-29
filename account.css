@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@200;400&display=swap');
+
+body {
+  background-color: #003;
+  font-family: 'Roboto Mono';
+  padding: 1%;
+  padding-top: calc(1% + 73px);
+  color: white;
+}
+
+#content {
+  text-align: center;
+}
+
+input {
+  width: 180px;
+  height: 35px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  font-family: 'Roboto Mono';
+  color: white;
+  background-color: #003;
+  border: 1px solid white;
+  font-weight: 200;
+  text-indent: 5px;
+  margin: 0px 20px 0px 0px;
+}
+
+input:focus {
+  outline: none;
+}
+
+button {
+  height: 34px;
+  display: inline-block;
+  border: none;
+  border-radius: 0;
+  background: white;
+  color: #003;
+  font-size: 16px;
+  font-family: 'Roboto Mono';
+  cursor: pointer;
+  border-radius: 2px;
+  margin: 10px 0px;
+}
+
+button:focus { 
+  outline: none;
+}
+
+button:active {
+  background: #ddd;
+}
+
+#logo {
+  display: inline-block;
+  font-size: 40px;
+  color: lime;
+  margin: 7px 20px;
+  text-decoration: none;
+}
+
+#navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background-color: #003;
+  border-bottom: lime 3px solid;
+  z-index: 1;
+}
+
+#navmenu {
+  display: inline-block;
+  float: right;
+  display: inline;
+  font-size: 20px;
+  color: lime;
+  margin: 30px 20px;
+}
+
+#navmenu a {
+  margin: 10px;
+  text-decoration: none;
+  color: lime;
+}
+
+#navmenu a:active {
+  color: green;
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <title>SSX2020PE™</title>
+  <head>
+    <link rel="stylesheet" href="about.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+
+  <body>
+    <div id="navbar">
+      <a href="main.html" id="logo">SSX2020PE™</a>
+      <div id="navmenu">
+        <a href="about.html">About</a>
+        <span>|</span>
+        <a href="account.html">Account</a>
+        <span>|</span>
+        <a href="help.html">Help</a>
+        <span>|</span>
+        <a onclick="logout()" href="javascript:void(0);">Logout</a>
+      </div>
+    </div>
+
+    <div id="content">
+      <p>Stock Simulator Xtreme 2020 Pro Edition is a paper trading simulator which allows you to trade in the past using historical stock data.</p>
+      <p>You start out with $5000 available in your account to buy stocks. Beginning from your selected start date, try your best to generate the largest returns you can over the course of one year!</p>
+      <h3>How to play</h3>
+      <p>Use the search function in the top right corner to search for stocks; the default stock symbol is AAPL, for Apple, Inc., but there are thousands of other stocks whose symbols can be referenced <a href="https://www.nyse.com/listings_directory/stock">on this site.</a></p>
+      <p>Once you have searched for a stock, the graph will update with the stock's performance over the past 30 days. You can adjust the time range by using the controls at the top of the graph, or click and drag your mouse over the graph to zoom in.</p>
+      <p>If you decide to buy shares in the stock, enter the number of shares in the "# shares" text field and click the "Buy" button. If you would like to buy the maximum number of shares possible with your current cash available, click the "Buy max" button.</p>
+      <p>Similarly, if you already own shares of a stock and would like to sell them, enter the number of shares you wish to sell and click the "Sell" button, or click the "Sell all" button to sell all owned shares of the current stock.</p>
+      <p>To view all stocks that you currently own, consult the table with the header cells "Stock" and "Shares".</p>
+      <p>To move the current day forward by one trading day, click the "Advance day" button. Your statistics at the bottom of the screen, along with the graph and current stock information, will update automatically.</p>
+    </div>
+
+    <script>
+      function logout() {
+          firebase.auth().signOut();
+        }
+
+      function initApp() {
+        // Listening for auth state changes.
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            // User is signed in.
+            var displayName = user.displayName;
+            var email = user.email;
+            var emailVerified = user.emailVerified;
+            var photoURL = user.photoURL;
+            var isAnonymous = user.isAnonymous;
+            var uid = user.uid;
+            var providerData = user.providerData;
+          } else {
+            // User is signed out.
+            window.location.replace("index.html");
+          }
+        });
+      }
+
+      window.onload = function() {
+        initApp();
+      }
+    </script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-auth.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAUvP6E7QP-b33l4u0TWipFO3Bb_pndnGA",
+        authDomain: "ssx2020pe.firebaseapp.com",
+        databaseURL: "https://ssx2020pe.firebaseio.com",
+        projectId: "ssx2020pe",
+        storageBucket: "ssx2020pe.appspot.com",
+        messagingSenderId: "398681056650",
+        appId: "1:398681056650:web:2276050bf886aa50465473"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+    </script>
+  </body>
+</html>
