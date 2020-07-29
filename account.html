@@ -59,6 +59,7 @@
         });
       }
 
+      // user updates password
       function updatePassword() {
         var user = firebase.auth().currentUser;
         var newPassword = document.getElementById("new_password").value;
@@ -77,6 +78,7 @@
         alert("Password updated.");
       }
 
+      // self account delete
       function deleteUser() {
         var user = firebase.auth().currentUser;
         var result = confirm("Are you sure you want to delete your account? This action cannot be undone.");

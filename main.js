@@ -1,7 +1,9 @@
+// Logout function
 function logout() {
   firebase.auth().signOut();
 }
 
+// Initialization of firebase app, and called whenever auth state is changed
 function initApp() {
   // Listening for auth state changes.
   firebase.auth().onAuthStateChanged(function(user) {
@@ -23,6 +25,7 @@ var submitDate = document.getElementById("submit_date");
 var randomDate = document.getElementById("random_date");
 var body = document.getElementsByTagName("body")[0];
 
+// Initialize app when window loaded, and display date selector modal
 window.onload = function() {
   initApp();
   modal.style.display = "block";
@@ -32,6 +35,7 @@ window.onload = function() {
   document.getElementById("pick_date").setAttribute("max", date.toISOString().substring(0,10));
 }
 
+// Date submit click handler
 submitDate.onclick = function() {
   userDate = document.getElementById("pick_date").value;
   parsedDate = new Date(userDate);
@@ -51,6 +55,7 @@ submitDate.onclick = function() {
   }
 }
 
+// Random date click handler
 randomDate.onclick = function() {
   maxDate = new Date();
   maxDate.setDate(maxDate.getDate() - 370);
@@ -66,6 +71,8 @@ randomDate.onclick = function() {
 var notificationBar = document.getElementById('notification_bar');
 var animate;
 
+// Handles notification bar at bottom of screen; type is either "log" or "error",
+// and the bar will be green or red, respectively
 async function notify(text, type) {
   clearTimeout(animate);
   if (type == "log") {
@@ -81,6 +88,7 @@ async function notify(text, type) {
   animate = await setTimeout(function(){notificationBar.classList.remove('fade')}, 4000);
 }
 
+// definitions of variables
 const apiKey = "SK92GYM09TPNS82E";
 var daysRemaining = 365;
 var cashAvailable = 5000;
@@ -90,6 +98,7 @@ var validDates;
 var userStocks = {};
 var date;
 
+// initialize site with data for Apple stock
 async function start(initialDate) {
   await getValidDates();
   while (!(initialDate.toISOString().substring(0,10) in validDates)) {
@@ -106,6 +115,7 @@ async function start(initialDate) {
   document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
 }
 
+// get all valid trading days in AlphaVantage history, by getting time series for Apple and grabbing date strings
 async function getValidDates() {
   const url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&outputsize=full&apikey=" + apiKey;
   const dates = await fetch(url)
@@ -115,34 +125,46 @@ async function getValidDates() {
   return;
 }
 
+// move current date forward by one and update statistics/graph; stop if user has reached current date
 function advanceDate() {
-  date.setDate(date.getDate() + 1);
-  daysRemaining--;
-  while (!(date.toISOString().substring(0,10) in validDates)) {
+  maxDate = new Date();
+  if (date < maxDate && daysRemaining > 0) {
     date.setDate(date.getDate() + 1);
     daysRemaining--;
+    while (!(date.toISOString().substring(0,10) in validDates) && date < maxDate) {
+      date.setDate(date.getDate() + 1);
+      daysRemaining--;
+    }
+    if (daysRemaining < 0) {
+      daysRemaining = 0;
+    }
+    updateGraph(currentTicker);
+    prevDayAssets = cashAvailable + portfolioValue;
+    updatePortfolioValue();
+    document.getElementById("current_date").innerHTML = date.toLocaleDateString('en-US', {timeZone: 'UTC'});
+    document.getElementById("days_remaining").innerHTML = daysRemaining;
+    document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
+    document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
+    document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
+    var oneDayChange = cashAvailable + portfolioValue - prevDayAssets;
+    var totalChange = cashAvailable + portfolioValue - 5000;
+    document.getElementById("24hr_change_dollars").innerHTML = oneDayChange.toFixed(2);
+    document.getElementById("24hr_change_percent").innerHTML = (100 * oneDayChange / prevDayAssets).toFixed(2);
+    document.getElementById("total_change_dollars").innerHTML = totalChange.toFixed(2);
+    document.getElementById("total_change_percent").innerHTML = (100 * totalChange / 5000).toFixed(2);
+    document.getElementById("shares_dollars").innerHTML = (userStocks[currentTicker].shares * getCurrentPrice(currentTicker)).toFixed(2);
+    if (daysRemaining == 0) {
+      alert("Time's up!");
+    }
   }
-  updateGraph(currentTicker);
-  prevDayAssets = cashAvailable + portfolioValue;
-  updatePortfolioValue();
-  document.getElementById("current_date").innerHTML = date.toLocaleDateString('en-US', {timeZone: 'UTC'});
-  document.getElementById("days_remaining").innerHTML = daysRemaining;
-  document.getElementById("cash_available").innerHTML = cashAvailable.toFixed(2);
-  document.getElementById("portfolio_value").innerHTML = portfolioValue.toFixed(2);
-  document.getElementById("total_assets").innerHTML = (cashAvailable + portfolioValue).toFixed(2);
-  var oneDayChange = cashAvailable + portfolioValue - prevDayAssets;
-  var totalChange = cashAvailable + portfolioValue - 5000;
-  document.getElementById("24hr_change_dollars").innerHTML = oneDayChange.toFixed(2);
-  document.getElementById("24hr_change_percent").innerHTML = (100 * oneDayChange / prevDayAssets).toFixed(2);
-  document.getElementById("total_change_dollars").innerHTML = totalChange.toFixed(2);
-  document.getElementById("total_change_percent").innerHTML = (100 * totalChange / 5000).toFixed(2);
-  document.getElementById("shares_dollars").innerHTML = (userStocks[currentTicker].shares * getCurrentPrice(currentTicker)).toFixed(2);
 }
 
+// get current price of stock
 function getCurrentPrice(ticker) {
   return Number(userStocks[ticker].timeSeries[date.toISOString().substring(0,10)]['5. adjusted close']);
 }
 
+// buy a number of shares of current stock
 function buy() {
   numShares = Number(document.getElementById("buy_sell_shares").value);
   document.getElementById("buy_sell_shares").value = "";
@@ -161,6 +183,7 @@ function buy() {
   updateStats();
 }
 
+// buy max number of shares of current stock
 function buyMax() {
   numShares = Math.floor(cashAvailable / getCurrentPrice(currentTicker));
   if (numShares != 0) {
@@ -171,6 +194,7 @@ function buyMax() {
   }
 }
 
+// sell a number of shares of current stock
 function sell() {
   numShares = Number(document.getElementById("buy_sell_shares").value);
   document.getElementById("buy_sell_shares").value = "";
@@ -189,6 +213,7 @@ function sell() {
   updateStats();
 }
 
+// sell max number of shares of current stock
 function sellAll() {
   numShares = userStocks[currentTicker].shares;
   if (numShares != 0) {
@@ -199,6 +224,7 @@ function sellAll() {
   }
 }
 
+// update statistics at bottom of screen
 function updateStats() {
   updatePortfolioValue();
   document.getElementById("num_shares").innerHTML = userStocks[currentTicker].shares;
@@ -225,6 +251,7 @@ function updateStats() {
   }
 }
 
+// update value of all assets
 function updatePortfolioValue() {
   val = 0;
   for (var key in userStocks) {
@@ -237,6 +264,7 @@ function updatePortfolioValue() {
   portfolioValue = val;
 }
 
+// update current stock and graph
 async function updateAll() {
   var ticker = document.getElementById("new_ticker").value.toUpperCase();
   document.getElementById("new_ticker").value = "";
@@ -252,11 +280,13 @@ async function updateAll() {
     return;
   }
 
+  // TODO handle reaching API call limit from AV
   if (await updateTicker(ticker)) {
     updateGraph(ticker);
   }
 }
 
+// update current selected stock
 async function updateTicker(ticker) {
 
   // if ticker absent in local storage
@@ -306,6 +336,7 @@ async function updateTicker(ticker) {
   }
 }
 
+// update graph for current stock
 async function updateGraph(ticker) {
   if (!(ticker in userStocks)) {
     console.error("ticker not found in storage");

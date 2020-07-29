@@ -34,6 +34,7 @@
     </script>
 
     <script>
+      // toggle between account creation and login
       function toggleLogin() {
         button = document.getElementById("login_button");
         link = document.getElementById("create_account");
@@ -52,6 +53,7 @@
         }
       }
 
+      // create account with email and pw
       function createAccount() {
         var email = document.getElementById('email').value;
         var password = document.getElementById('password').value;
@@ -81,6 +83,7 @@
         // [END createwithemail]
       }
 
+      // login with email and pw
       function login() {
         if (firebase.auth().currentUser) {
         // [START signout]
@@ -116,6 +119,7 @@
       }
     }
 
+    // Login anonymously
     function loginAnon() {
       firebase.auth().signInAnonymously().catch(function(error) {
         // Handle Errors here.
@@ -131,6 +135,7 @@
       });
     }
 
+    // initialize firebase
     function initApp() {
       // Listening for auth state changes.
       firebase.auth().onAuthStateChanged(function(user) {

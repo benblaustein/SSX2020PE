@@ -33,10 +33,12 @@
     </div>
 
     <script>
+      // logout function
       function logout() {
           firebase.auth().signOut();
         }
 
+      // initialize firebase
       function initApp() {
         // Listening for auth state changes.
         firebase.auth().onAuthStateChanged(function(user) {
