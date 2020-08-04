@@ -17,6 +17,9 @@ function initApp() {
       var uid = user.uid;
       var providerData = user.providerData;
     }
+    else {
+      window.location.replace("index.html");
+    }
   });
 }
 
